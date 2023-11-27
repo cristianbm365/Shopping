@@ -5,10 +5,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext<DataContext>(o =>
+builder.Services.AddDbContext<DataContext>(o => // acá, esto viene de CountriesController
 {
     o.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+}); // significa que cualquier clase que llame al datacontext trae lo anterior, una conexión con el sql server y está basado con el GetConnectionString
 
 var app = builder.Build();
 

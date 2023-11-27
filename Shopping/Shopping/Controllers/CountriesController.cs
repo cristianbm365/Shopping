@@ -1,33 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shopping.Data;
 using Shopping.Data.Entities;
 
 namespace Shopping.Controllers
 {
-    public class CountriesController : Controller
+    public class CountriesController : Controller // es una clase, un controlador es una clase,hereda de controller
     {
         private readonly DataContext _context;
 
         public CountriesController(DataContext context)
+        // por el constructor le estamos enviando el contexto de datos, es el acceso a DB. Aquí se está haciendo una inyección de dependecias, este controlador CountriesController
+        // no instancia directa/ al datacontext, sino que se lo pasa, esto se llama que se lo estoy inyectando y se configura en el program en el builder
         {
-            _context = context;
-        }
+            _context = context; //se lo pasamos por parámetro, y se lo asignamos aun atributo, pq si no lo asignamos then solo tendríamos acceso al contexto de datos en el constructor
+        } 
 
-        // GET: Countries
+        [HttpGet]// GET: Countries
         public async Task<IActionResult> Index()
-        {
-              return _context.Countries != null ? 
-                          View(await _context.Countries.ToListAsync()) :
-                          Problem("Entity set 'DataContext.Countries'  is null.");
+        { // devuelve un método asincrono porque hay una consulta async
+            return _context.Countries != null ?
+                        View(await _context.Countries.ToListAsync()) : // el await es para que espere hasta que termine la consulta antes de guardar el parámetro
+                        Problem("Entity set 'DataContext.Countries'  is null.");
         }
 
-        // GET: Countries/Details/5
+        [HttpGet]// GET: Countries/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Countries == null)
@@ -45,18 +42,15 @@ namespace Shopping.Controllers
             return View(country);
         }
 
-        // GET: Countries/Create
+        [HttpGet]// GET: Countries/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Countries/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] Country country)
+        public async Task<IActionResult> Create(Country country)
         {
             if (ModelState.IsValid)
             {
@@ -150,14 +144,14 @@ namespace Shopping.Controllers
             {
                 _context.Countries.Remove(country);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool CountryExists(int id)
         {
-          return (_context.Countries?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Countries?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
