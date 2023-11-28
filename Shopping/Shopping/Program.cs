@@ -10,6 +10,8 @@ builder.Services.AddDbContext<DataContext>(o => // acá, esto viene de CountriesC
     o.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 }); // significa que cualquier clase que llame al datacontext trae lo anterior, una conexión con el sql server y está basado con el GetConnectionString
 
+builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())

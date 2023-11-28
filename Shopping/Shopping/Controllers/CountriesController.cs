@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Shopping.Data;
 using Shopping.Data.Entities;
+using Shopping.Models;
 
 namespace Shopping.Controllers
 {
@@ -14,14 +15,14 @@ namespace Shopping.Controllers
         // no instancia directa/ al datacontext, sino que se lo pasa, esto se llama que se lo estoy inyectando y se configura en el program en el builder
         {
             _context = context; //se lo pasamos por parámetro, y se lo asignamos aun atributo, pq si no lo asignamos then solo tendríamos acceso al contexto de datos en el constructor
-        } 
+        }
 
         [HttpGet]// GET: Countries
         public async Task<IActionResult> Index()
-        { // devuelve un método asincrono porque hay una consulta async
-            return _context.Countries != null ?
-                        View(await _context.Countries.ToListAsync()) : // el await es para que espere hasta que termine la consulta antes de guardar el parámetro
-                        Problem("Entity set 'DataContext.Countries'  is null.");
+        { // devuelve un método asincrono porque hay una consulta async 
+            return View(await _context.Countries // el await es para que espere hasta que termine la consulta antes de guardar el parámetro
+                .Include(c => c.States)
+                .ToListAsync());
         }
 
         [HttpGet]// GET: Countries/Details/5
@@ -33,6 +34,7 @@ namespace Shopping.Controllers
             }
 
             var country = await _context.Countries
+                .Include(c => c.States)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (country == null)
             {
@@ -45,7 +47,8 @@ namespace Shopping.Controllers
         [HttpGet]// GET: Countries/Create
         public IActionResult Create()
         {
-            return View();
+            Country country = new() { States = new List<State>() };
+            return View(country);
         }
 
         [HttpPost]
@@ -77,6 +80,64 @@ namespace Shopping.Controllers
                 }
             }
             return View(country);
+
+        }
+        public async Task<IActionResult> AddState(int? id) // en condiciones normales el id no llega nulo, pero si es posible si el usuario lo ingresa manualmente porel querystring
+        {
+            if (id == null || _context.Countries == null)
+            {
+                return NotFound();
+            }
+
+            Country country = await _context.Countries.FindAsync(id);
+            if (country == null)
+            {
+                return NotFound();
+            }
+
+            StateViewModel model = new()
+            {
+                CountryId = country.Id,
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddState(StateViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    State state = new()
+                    {
+                        Cities = new List<City>(),
+                        Country = await _context.Countries.FindAsync(model.CountryId),
+                        Name = model.Name,
+                    };
+                    _context.Add(state);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Details), new { Id = model.CountryId });
+                }
+                catch (DbUpdateException dbUpdateException)
+                {
+                    if (dbUpdateException.InnerException.Message.Contains("duplicate"))
+                    {
+                        ModelState.AddModelError(string.Empty, "Ya existe un departamento/estado con el mismo nombre en este país.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message);
+                    }
+                }
+                catch (Exception exception)
+                {
+                    ModelState.AddModelError(string.Empty, exception.Message);
+                }
+            }
+            return View(model);
 
         }
 
@@ -135,42 +196,112 @@ namespace Shopping.Controllers
             return View(country);
 
         }
-
-        // GET: Countries/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> EditState(int? id)
         {
             if (id == null || _context.Countries == null)
             {
                 return NotFound();
             }
 
-            var country = await _context.Countries
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (country == null)
+            State state = await _context.States
+                .Include(s => s.Country)
+                .FirstOrDefaultAsync(s => s.Id == id);
+            if (state == null)
             {
                 return NotFound();
             }
-
-            return View(country);
-        }
-
-        // POST: Countries/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.Countries == null)
+            StateViewModel model = new()
             {
-                return Problem("Entity set 'DataContext.Countries'  is null.");
-            }
-            var country = await _context.Countries.FindAsync(id);
-            if (country != null)
-            {
-                _context.Countries.Remove(country);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+                CountryId = state.Country.Id,
+                Id = state.Id,
+                Name = state.Name,
+            };
+            return View(model);
     }
+
+
+    // POST: Countries/Edit/5
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditState(int id, StateViewModel model)
+    {
+        if (id != model.Id)
+        {
+            return NotFound();
+        }
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                State state = new()
+                {
+                    Id = model.Id,
+                    Name = model.Name,
+                };
+                _context.Update(state);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Details), new { Id = model.CountryId });
+            }
+            catch (DbUpdateException dbUpdateException)
+            {
+                if (dbUpdateException.InnerException.Message.Contains("duplicate"))
+                {
+                    ModelState.AddModelError(string.Empty, "Ya existe un departamento/estado con el mismo nombre en este país.");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, 
+                        dbUpdateException.InnerException.Message);
+                }
+            }
+            catch (Exception exception)
+            {
+                ModelState.AddModelError(string.Empty, exception.Message);
+            }
+        }
+        return View(model);
+
+    }
+
+    // GET: Countries/Delete/5
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id == null || _context.Countries == null)
+        {
+            return NotFound();
+        }
+
+        Country country = await _context.Countries
+            .Include(c => c.States)
+            .FirstOrDefaultAsync(c => c.Id == id);
+        if (country == null)
+        {
+            return NotFound();
+        }
+
+        return View(country);
+    }
+
+    // POST: Countries/Delete/5
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        if (_context.Countries == null)
+        {
+            return Problem("Entity set 'DataContext.Countries'  is null.");
+        }
+        var country = await _context.Countries.FindAsync(id);
+        if (country != null)
+        {
+            _context.Countries.Remove(country);
+        }
+
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+}
 }
