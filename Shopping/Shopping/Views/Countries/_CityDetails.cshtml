@@ -1,0 +1,12 @@
+﻿@model Shopping.Data.Entities.City
+
+<h4>Ciudad</h4>
+<hr /> @* abajo hay 2 porque uno es el título y otro el contenido del campo *@
+<dl class="row">
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.Name)
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.Name)
+    </dd>
+</dl>
