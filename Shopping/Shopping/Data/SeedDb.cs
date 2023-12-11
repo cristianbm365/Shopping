@@ -23,17 +23,18 @@ namespace Shopping.Data
             await CheckCountriesAsync();
             await CheckRolesAsync();
             await CheckUserAsync("1010", "Cristian", "Bedoya", "cristianbm@yopmail.com", "3508847326", "Calle Luna Calle Sol", UserType.Admin);
+            await CheckUserAsync("2020", "Juan", "Mesa", "juanm@yopmail.com", "3508847326", "Calle Luna Calle Sol", UserType.User);
         }
 
         private async Task<User> CheckUserAsync(
-    string document,
-    string firstName,
-    string lastName,
-    string email,
-    string phone,
-    string address,
-    UserType userType)
-        {
+            string document,
+            string firstName,
+            string lastName,
+            string email,
+            string phone,
+            string address,
+            UserType userType)
+                {
             User user = await _userHelper.GetUserAsync(email);
             if (user == null)
             {
