@@ -33,6 +33,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddTransient<SeedDb>();
 builder.Services.AddScoped<IUserHelper, UserHelper>(); // la gran mayoría son scoped porque lo crea cuando lo necesita y lo destruye cuando lo deja de usar
 builder.Services.AddScoped<ICombosHelper, CombosHelper>();
+builder.Services.AddScoped<IBlobHelper, BlobHelper>();
 builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 
 var app = builder.Build();

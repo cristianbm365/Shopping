@@ -10,12 +10,12 @@ namespace Shopping.Helpers
 		private readonly DataContext _context;
 
 		public CombosHelper(DataContext context)
-        {
+		{
 			_context = context;
 		}
-        public async Task<IEnumerable<SelectListItem>> GetComboCategoriesAsync()
+		public async Task<IEnumerable<SelectListItem>> GetComboCategoriesAsync()
 		{
-			List<SelectListItem> list = await _context.Categories.Select( c => new SelectListItem
+			List<SelectListItem> list = await _context.Categories.Select(c => new SelectListItem
 			{
 				Text = c.Name,
 				Value = c.Id.ToString()
@@ -34,9 +34,9 @@ namespace Shopping.Helpers
 				.Where(s => s.State.Id == stateId)
 				.Select(c => new SelectListItem
 				{
-				Text = c.Name,
-				Value = c.Id.ToString()
-			})
+					Text = c.Name,
+					Value = c.Id.ToString()
+				})
 				.OrderBy(c => c.Text)
 				.ToListAsync();
 
@@ -65,10 +65,10 @@ namespace Shopping.Helpers
 			List<SelectListItem> list = await _context.States
 				.Where(s => s.Country.Id == countryId)
 				.Select(c => new SelectListItem
-			{
-				Text = c.Name,
-				Value = c.Id.ToString()
-			})
+				{
+					Text = c.Name,
+					Value = c.Id.ToString()
+				})
 				.OrderBy(c => c.Text)
 				.ToListAsync();
 
@@ -76,4 +76,5 @@ namespace Shopping.Helpers
 
 			return list;
 		}
+	}
 }
