@@ -24,6 +24,7 @@ namespace Shopping.Controllers
         { // devuelve un método asincrono porque hay una consulta async 
             return View(await _context.Countries // el await es para que espere hasta que termine la consulta antes de guardar el parámetro
                 .Include(c => c.States)
+                .ThenInclude(s => s.Cities)
                 .ToListAsync());
         }
 

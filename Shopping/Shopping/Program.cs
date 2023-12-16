@@ -16,16 +16,20 @@ builder.Services.AddDbContext<DataContext>(o => // acá, esto viene de CountriesC
 //TODO: Make strangest password
 builder.Services.AddIdentity<User, IdentityRole>(cfg =>
 {
-	cfg.User.RequireUniqueEmail = true;
+    cfg.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
+    cfg.SignIn.RequireConfirmedEmail = true;
+    cfg.User.RequireUniqueEmail = true;
 	cfg.Password.RequireDigit = false;
 	cfg.Password.RequiredUniqueChars = 0;
 	cfg.Password.RequireLowercase = false;
 	cfg.Password.RequireNonAlphanumeric = false;
 	cfg.Password.RequireUppercase = false;
-    cfg.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1);
+    cfg.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     cfg.Lockout.MaxFailedAccessAttempts = 3;
     cfg.Lockout.AllowedForNewUsers = true;
-}).AddEntityFrameworkStores<DataContext>();
+})
+    .AddDefaultTokenProviders()
+    .AddEntityFrameworkStores<DataContext>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -37,6 +41,7 @@ builder.Services.AddTransient<SeedDb>();
 builder.Services.AddScoped<IUserHelper, UserHelper>(); // la gran mayoría son scoped porque lo crea cuando lo necesita y lo destruye cuando lo deja de usar
 builder.Services.AddScoped<ICombosHelper, CombosHelper>();
 builder.Services.AddScoped<IBlobHelper, BlobHelper>();
+builder.Services.AddScoped<IMailHelper, MailHelper>();
 builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 
 var app = builder.Build();
@@ -72,3 +77,4 @@ app.MapControllerRoute(
 	pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
