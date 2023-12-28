@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Shopping.Data;
 using Shopping.Data.Entities;
 using Shopping.Helpers;
+using Vereyon.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddTransient<SeedDb>();
+builder.Services.AddFlashMessage();
 builder.Services.AddScoped<IUserHelper, UserHelper>(); // la gran mayoría son scoped porque lo crea cuando lo necesita y lo destruye cuando lo deja de usar
 builder.Services.AddScoped<ICombosHelper, CombosHelper>();
 builder.Services.AddScoped<IBlobHelper, BlobHelper>();
