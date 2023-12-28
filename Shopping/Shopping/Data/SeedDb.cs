@@ -76,13 +76,13 @@ namespace Shopping.Data
                 ProductImages = new List<ProductImage>()
             };
 
-            foreach (string? category in categories)
+            foreach (string category in categories)
             {
                 prodcut.ProductCategories.Add(new ProductCategory { Category = await _context.Categories.FirstOrDefaultAsync(c => c.Name == category) });
             }
 
 
-            foreach (string? image in images)
+            foreach (string image in images)
             {
                 Guid imageId = await _blobHelper.UploadBlobAsync($"{Environment.CurrentDirectory}\\wwwroot\\images\\products\\{image}", "products");
                 prodcut.ProductImages.Add(new ProductImage { ImageId = imageId });
