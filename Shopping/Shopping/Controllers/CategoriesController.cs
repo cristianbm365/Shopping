@@ -27,22 +27,6 @@ namespace Shopping.Controllers
                         .ToListAsync());
         }
 
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            Category category = await _context.Categories.FindAsync(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            return View(category);
-        }
-
         [NoDirectAccess]
         public async Task<IActionResult> Delete(int? id)
         {
@@ -119,7 +103,7 @@ namespace Shopping.Controllers
                     return View(category);
                 }
 
-                return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAll", _context.Categories.Include(c => c.ProductCategories).ToList()) });
+                return Json(new { isValid = true, html = ModalHelper.RenderRazorViewToString(this, "_ViewAllCountries", _context.Categories.Include(c => c.ProductCategories).ToList()) });
 
             }
 
