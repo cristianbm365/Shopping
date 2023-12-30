@@ -34,7 +34,7 @@ namespace Shopping.Helpers
 				Email = model.Username,
 				FirstName = model.FirstName,
 				LastName = model.LastName,
-				ImageId = model. ImageId,
+				ImageId = model.ImageId,
 				PhoneNumber = model.PhoneNumber,
 				City = await _context.Cities.FindAsync(model.CityId),
 				UserName = model.Username,

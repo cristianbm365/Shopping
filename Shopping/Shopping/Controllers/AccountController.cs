@@ -7,7 +7,6 @@ using Shopping.Data.Entities;
 using Shopping.Enums;
 using Shopping.Helpers;
 using Shopping.Models;
-using System.Data;
 using Vereyon.Web;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
@@ -31,6 +30,7 @@ namespace Shopping.Controllers
             _mailHelper = mailHelper;
             _flashMessage = flashMessage;
         }
+
         public IActionResult Login()
         {
             if (User.Identity.IsAuthenticated)
@@ -71,7 +71,7 @@ namespace Shopping.Controllers
 
         public async Task<IActionResult> Logout()
         {
-            await _userHelper.LogoutAsync(); // borra las cockies, credenciales, cierra datos de sesión 
+            await _userHelper.LogoutAsync();
             return RedirectToAction("Index", "Home");
         }
 
@@ -130,7 +130,7 @@ namespace Shopping.Controllers
                     model.Username,
                     "Shopping - Confirmación de Email",
                     $"<h1>Shopping - Confirmación de Email</h1>" +
-                        $"Para habilitar el usuario por favor hacer clic en el siguiente link:, " +
+                        $"Para habilitar el usuario por favor hacer click en el siguiente link:, " +
                         $"<hr/><br/><p><a href = \"{tokenLink}\">Confirmar Email</a></p>");
                 if (response.IsSuccess)
                 {
@@ -146,6 +146,7 @@ namespace Shopping.Controllers
             model.Cities = await _combosHelper.GetComboCitiesAsync(model.StateId);
             return View(model);
         }
+
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
@@ -167,7 +168,6 @@ namespace Shopping.Controllers
 
             return View();
         }
-
 
         public JsonResult GetStates(int countryId)
         {
@@ -194,6 +194,7 @@ namespace Shopping.Controllers
 
             return Json(state.Cities.OrderBy(c => c.Name));
         }
+
         public async Task<IActionResult> ChangeUser()
         {
             User user = await _userHelper.GetUserAsync(User.Identity.Name);
@@ -248,11 +249,13 @@ namespace Shopping.Controllers
                 await _userHelper.UpdateUserAsync(user);
                 return RedirectToAction("Index", "Home");
             }
+
             model.Countries = await _combosHelper.GetComboCountriesAsync();
             model.States = await _combosHelper.GetComboStatesAsync(model.CountryId);
             model.Cities = await _combosHelper.GetComboCitiesAsync(model.StateId);
             return View(model);
         }
+
         public IActionResult ChangePassword()
         {
             return View();
@@ -269,10 +272,10 @@ namespace Shopping.Controllers
                     return View(model);
                 }
 
-                User user = await _userHelper.GetUserAsync(User.Identity.Name);
+                User? user = await _userHelper.GetUserAsync(User.Identity.Name);
                 if (user != null)
                 {
-                    IdentityResult result = await _userHelper.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+                    IdentityResult? result = await _userHelper.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
                     if (result.Succeeded)
                     {
                         return RedirectToAction("ChangeUser");
@@ -290,6 +293,7 @@ namespace Shopping.Controllers
 
             return View(model);
         }
+
         public IActionResult RecoverPassword()
         {
             return View();
@@ -351,6 +355,5 @@ namespace Shopping.Controllers
             _flashMessage.Danger("Usuario no encontrado.");
             return View(model);
         }
-
     }
 }
